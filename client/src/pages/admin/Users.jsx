@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/CustomModal/DeleteModal';
 import { adminFetchUsers, userDeleteAction } from '../../store/redux';
 import { useDispatch, useSelector } from 'react-redux';
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 function Users() {
     const dispatch = useDispatch();
     const users = useSelector(state => state?.admin?.users);
+    const [displayUsers, setDisplayUsers] = useState(users);
 
     const [open, setOpen] = useState(false);
     const [currId, setCurrId] = useState("");
@@ -21,12 +23,23 @@ function Users() {
         dispatch(userDeleteAction(id, setOpen));
     }
 
+    const handleSearch = (key) => {
+        if(key.length >= 1){
+            const filterd = users.filter((doc) => {
+                return doc.name.toLowerCase().includes(key.toLowerCase());
+            })
+            setDisplayUsers(filterd);
+        } else {
+            setDisplayUsers(users);
+        }
+    }
+
     return (
         <>
             <div className='w-full min-h-screen px-14 pt-24 bg-slate-200 flex flex-col items-center justify-start gap-2 shadow-sm'>
-                {console.log(users)}
-                {!users && <h4>No users found !</h4>}
-                {users?.map((doc) => {
+                <SearchBar handleSearch={handleSearch} />
+                {!displayUsers && <h4>No users found !</h4>}
+                {displayUsers?.map((doc) => {
                     return (
                         <div key={doc._id} className='user_card w-full flex items-center justify-between px-10 py-4 rounded bg-white'>
                             <div className='flex items-center justify-center gap-6'>
