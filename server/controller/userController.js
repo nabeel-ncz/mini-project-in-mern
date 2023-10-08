@@ -1,5 +1,5 @@
 const userCollection = require('../models/User');
-const bcyrpt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const registerUser = async (req, res) => {
@@ -9,12 +9,13 @@ const registerUser = async (req, res) => {
         filename = req.file.filename;
     }
     try {
-        const hash = await bcyrpt.hash(password, 10);
+        const hash = await bcrypt.hash(password, 10);
         const data = await userCollection.create({
             name,
             email,
             password: hash,
             profile: filename,
+            createdAt: new Date().toLocaleString(),
         });
         if (!data) {
             res.json({ status: 'error', message: 'database error' });
@@ -25,9 +26,13 @@ const registerUser = async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24,
             httpOnly: true,
         });
-        res.json({ status: 'ok', data: { name, userId: data._id } });
+        res.status(201).json({ status: 'ok', data: { name, userId: data._id } });
     } catch (err) {
-        res.json({ status: 'error', message: err.message });
+        if (err.code === 11000) {
+            res.json({ status: 'error', message: "Email is already exist" });
+        } else {
+            res.json({ status: 'error', message: err.message });
+        }
     }
 }
 
@@ -36,12 +41,12 @@ const loginUser = async (req, res) => {
     try {
         const user = await userCollection.findOne({ email: email });
         if (!user) {
-            res.json({ status: "error", message: "email doesn't exist" });
+            res.json({ status: "error", message: "Email doesn't exist" });
             return;
         }
-        const match = await bcyrpt.compare(password, user.password);
+        const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            res.json({ status: "error", message: "email or password is incorrect" });
+            res.json({ status: "error", message: "Email or password is incorrect" });
             return;
         }
         const token = jwt.sign({ name: user.name, id: user._id }, "userjwtsecret", { expiresIn: 60 * 60 * 24 });
@@ -49,14 +54,58 @@ const loginUser = async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24,
             httpOnly: true,
         });
-        res.json({
+        res.status(200).json({
             status: "ok", data: {
                 name: user.name,
                 userId: user._id,
             }
         });
     } catch (err) {
-        res.json({ status: 'error', message: err.message });
+        if (err.code === 11000) {
+            res.json({ status: 'error', message: "Email is already exist" });
+        } else {
+            res.json({ status: 'error', message: err.message });
+        }
+    }
+}
+
+const updateUser = async (req, res) => {
+    const userId = req.params?.id;
+    const { name, email, password } = req.body;
+    const filename = req?.file?.filename;
+    try {
+        const hash = await bcrypt.hash(password, 10);
+        const data = await userCollection.updateOne({ _id: userId }, {
+            name,
+            email,
+            password: hash,
+            profile: filename,
+        })
+        if (!data) {
+            res.json({ status: 'error', message: 'Database error' });
+            return;
+        }
+        res.status(200).json({ status: 'ok' });
+    } catch (err) {
+        if (err.code === 11000) {
+            res.json({ status: 'error', message: "Email is already exist" });
+        } else {
+            res.json({ status: 'error', message: err.message });
+        }
+    }
+}
+
+const getUser = async (req, res) => {
+    const id = req.params?.id;
+    try {
+        const user = await userCollection.findOne({_id: id});
+        if(!user) {
+            res.json({status:'error', message:'User not found'});
+            return;
+        }
+        res.status(200).json({status:'ok', data : {user}});
+    } catch (error) {
+        res.json({ status:'error', message : error.message });
     }
 }
 
@@ -68,7 +117,7 @@ const checkUserAuth = (req, res) => {
             if (err) {
                 res.json({ status: "error", message: err });
             } else {
-                res.json({ status: 'ok', data: decoded });
+                res.status(200).json({ status: 'ok', data: decoded });
             }
         })
     } else {
@@ -77,12 +126,14 @@ const checkUserAuth = (req, res) => {
 }
 const logoutUser = (req, res) => {
     res.cookie("userjwt", "", { maxAge: 1});
-    res.json({status:'ok'});
+    res.status(200).json({status:'ok'});
 }
 
 module.exports = {
     registerUser,
     loginUser,
     checkUserAuth,
-    logoutUser
+    logoutUser,
+    getUser,
+    updateUser,
 }

@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useFormData } from '../hooks/hooks';
-import { registerUserAction, userSetAction } from '../store/redux';
-import axios from "axios";
-import { useDispatch, useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+import { useFormData } from '../../hooks/hooks';
+import { adminCreateAction } from '../../store/redux';
+import { useDispatch } from 'react-redux';
 
-function Register() {
-    const navigate = useNavigate();
-    //dispatch
+function Create() {
     const dispatch = useDispatch();
-    //states
-    const [form, setForm, handleChange] = useFormData({ name: '', email: '', password: '' });
+    const [ form, setForm, handleChange ] = useFormData({
+        name:'',
+        email:'',
+        password:'',
+    });
+    const [imageBlob, setImageBlob] = useState(null);
     const [image, setImage] = useState(null);
-    const [imageBlob, setImageBlob] = useState("");
-    //for image showing when image is adding
+
+
     const handleImageChange = (event) => {
         setImage(event.target.files[0]);
         const selected = event.target.files[0];
@@ -27,21 +26,16 @@ function Register() {
             fileReader.readAsDataURL(selected);
         }
     }
-    //form submition
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        dispatch(registerUserAction({
-            image: image,
-            name: form.name,
-            email: form.email,
-            password: form.password,
-        }, navigate));
+        dispatch(adminCreateAction({image, name:form.name, email:form.email, password:form.password},setForm,setImageBlob));
     }
 
     return (
         <div className='w-full min-h-screen flex bg-slate-200 items-center justify-center'>
             <div className='w-1/4 bg-white flex flex-col items-center justify-center p-8'>
-                <h2 className='font-bold text-xl'>Create Account</h2>
+                <h2 className='font-bold text-xl'>Create User</h2>
                 <form action="" className='w-full flex flex-col gap-4' onSubmit={handleSubmit}>
                     <div className="w-full flex flex-col items-start gap-2">
                         <label htmlFor="">Name</label>
@@ -66,9 +60,6 @@ function Register() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full flex flex-col items-start gap-2">
-                        <span>Already have an account <Link to={'/login'}>Login ?</Link></span>
-                    </div>
 
                     <div className="w-full flex flex-col items-start gap-2">
                         <button type='submit' className='w-full text-center py-2 bg-black text-white'>Create</button>
@@ -76,8 +67,7 @@ function Register() {
                 </form>
             </div>
         </div>
-
     )
 }
 
-export default Register;
+export default Create

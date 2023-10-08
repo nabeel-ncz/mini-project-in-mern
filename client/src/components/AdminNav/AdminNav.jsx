@@ -17,7 +17,7 @@ function AdminNav() {
                     <li>About</li>
                     <li>Contact</li>
                     {isAuthenticated
-                        ? <LogoutButton role="admin" />
+                        ? <LogoutButton role="admin" text_color="text-white" bg_color="bg-black"/>
                         : <RegisterButton role="admin" />
                     }
                 </ul>

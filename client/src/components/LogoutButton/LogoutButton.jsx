@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { adminLogoutAction, userLogoutAction } from '../../store/redux';
 import { useNavigate } from 'react-router-dom';
+import CustomModal from '../CustomModal/CustomModal';
 
-function LogoutButton({role}) {
+function LogoutButton({ role, text_color, bg_color }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
 
     const handleUserLogout = () => {
         dispatch(userLogoutAction());
@@ -13,12 +15,18 @@ function LogoutButton({role}) {
     }
     const handleAdminLogout = () => {
         dispatch(adminLogoutAction());
-        navigate('/admin/auth', {replace: true });
+        navigate('/admin/auth', { replace: true });
+    }
+
+    const handleModal = () => {
+        setOpen(true);
     }
 
     return (
         <>
-            <button onClick={role === "user" ? handleUserLogout : handleAdminLogout} className='px-6 py-2 bg-black text-white'>Logout</button>
+            <button onClick={handleModal} className={`px-6 py-2 ${text_color} ${bg_color}`}>Logout</button>
+            <CustomModal handleLogout={role === "user" ? handleUserLogout : handleAdminLogout}
+            open={open} setOpen={setOpen} />
         </>
     )
 }

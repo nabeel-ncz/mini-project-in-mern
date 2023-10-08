@@ -6,11 +6,16 @@ import Register from './pages/Register'
 import Home from './pages/Home';
 import AdminDashboard from './pages/admin/Home';
 import AdminLogin from './pages/admin/Login';
+import Create from './pages/admin/Create';
+import Users from './pages/admin/Users';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { userSetAction, adminSetAction } from './store/redux';
 import axios from 'axios';
 import AdminNav from './components/AdminNav/AdminNav';
+import Edit from './pages/admin/Edit';
+import EditUser from './pages/Edit';
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const navigate = useNavigate();
@@ -19,11 +24,12 @@ function App() {
   const admin = useSelector(state => state.admin);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!user.isAuthenticated) {
       axios.get('http://localhost:3000/user/get_auth', {
         withCredentials: true
       }).then((result) => {
+        console.log(result);
         if (result.data.status === 'ok') {
           dispatch(userSetAction({
             name: result.data.data.name,
@@ -51,11 +57,13 @@ function App() {
 
   return (
     <>
+      <Toaster position='top-center' />
       {location.pathname.split('/').at(1) === "admin" ? <AdminNav /> : <Navbar />}
       <Routes>
         {user.isAuthenticated ?
           (<>
             <Route path='/' element={<Home />} />
+            <Route path='/edit' element={<EditUser />} />
             <Route path='*' element={admin.isAuthenticated &&
               <Navigate to={`${location.pathname.split('/').at(1) === "admin" ?
                 "/admin" : "/"}`} replace />} />
@@ -64,12 +72,16 @@ function App() {
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
             <Route path='*' element={
-              <Navigate to={`${location.pathname === '/' ? "/register" : location.pathname}`} replace />} />
+              <Navigate to={`${location.pathname === '/' ? "/register" : location.pathname}`} replace />}
+             />
           </>)
         }
         {admin.isAuthenticated ?
           (<>
             <Route path='/admin' element={<AdminDashboard />} />
+            <Route path='/admin/create_user' element={<Create />} />
+            <Route path='/admin/show_users' element={<Users />} />
+            <Route path='/admin/show_users/edit/:id' element={<Edit />} />
             <Route path="/admin/*" element={<Navigate to="/admin" replace />}/>
           </>) :
           (<>

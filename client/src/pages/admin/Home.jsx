@@ -11,7 +11,7 @@ function Home() {
         <div className='w-full min-h-screen bg-slate-200 flex items-center justify-center'>
             <div className='w-1/2 bg-white border-2 rounded px-12 py-6 flex flex-col gap-4'>
                 <div onClick={() => {
-                    navigate('/admin/create')
+                    navigate('/admin/create_user')
                 }} className='px-6 py-2 flex items-center justify-center shadow-lg gap-4'>
                     <span><IoCreateOutline size={30} /></span>
                     <h4 className='font-bold'>Create User</h4>

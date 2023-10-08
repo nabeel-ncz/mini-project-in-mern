@@ -1,20 +1,31 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFormData } from '../hooks/hooks';
-import { registerUserAction, userSetAction } from '../store/redux';
-import axios from "axios";
+import { updateUserAction, userSetAction } from '../store/redux';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 
-function Register() {
+function Edit() {
     const navigate = useNavigate();
+    const location = useLocation();
     //dispatch
     const dispatch = useDispatch();
+    const userId = useSelector(state => state.user.userId)
     //states
     const [form, setForm, handleChange] = useFormData({ name: '', email: '', password: '' });
     const [image, setImage] = useState(null);
     const [imageBlob, setImageBlob] = useState("");
-    //for image showing when image is adding
+
+    useEffect(() => {
+        const search = new URLSearchParams(location.search)
+        setForm(prev => ({
+            ...prev,
+            name: search.get("name"),
+            email: search.get("email"),
+        }))
+    },[]);
+
+    //for image showing 
     const handleImageChange = (event) => {
         setImage(event.target.files[0]);
         const selected = event.target.files[0];
@@ -27,21 +38,23 @@ function Register() {
             fileReader.readAsDataURL(selected);
         }
     }
+
     //form submition
     const handleSubmit = (event) => {
         event.preventDefault();
-        dispatch(registerUserAction({
+        dispatch(updateUserAction({
             image: image,
             name: form.name,
             email: form.email,
             password: form.password,
+            userId,
         }, navigate));
     }
 
     return (
         <div className='w-full min-h-screen flex bg-slate-200 items-center justify-center'>
             <div className='w-1/4 bg-white flex flex-col items-center justify-center p-8'>
-                <h2 className='font-bold text-xl'>Create Account</h2>
+                <h2 className='font-bold text-xl'>Edit Account</h2>
                 <form action="" className='w-full flex flex-col gap-4' onSubmit={handleSubmit}>
                     <div className="w-full flex flex-col items-start gap-2">
                         <label htmlFor="">Name</label>
@@ -66,18 +79,14 @@ function Register() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full flex flex-col items-start gap-2">
-                        <span>Already have an account <Link to={'/login'}>Login ?</Link></span>
-                    </div>
 
                     <div className="w-full flex flex-col items-start gap-2">
-                        <button type='submit' className='w-full text-center py-2 bg-black text-white'>Create</button>
+                        <button type='submit' className='w-full text-center py-2 bg-black text-white'>Update</button>
                     </div>
                 </form>
             </div>
         </div>
-
     )
 }
 
-export default Register;
+export default Edit
