@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import DeleteModal from '../../components/CustomModal/DeleteModal';
 import { adminFetchUsers, userDeleteAction } from '../../store/redux';
@@ -15,18 +15,22 @@ function Users() {
     const [currId, setCurrId] = useState("");
     const navigate = useNavigate();
 
-    useEffect(() => {
-        dispatch(adminFetchUsers());
+    useLayoutEffect(() => {
+        dispatch(adminFetchUsers(setDisplayUsers));
     }, []);
 
     const handleDelete = (id) => {
-        dispatch(userDeleteAction(id, setOpen));
+        const filtered = users.filter((doc) => {
+            return doc._id !== id;
+        })
+        setDisplayUsers(filtered)
+        dispatch(userDeleteAction(id, setOpen, setDisplayUsers));
     }
 
     const handleSearch = (key) => {
         if(key.length >= 1){
             const filterd = users.filter((doc) => {
-                return doc.name.toLowerCase().includes(key.toLowerCase());
+                return doc.name.toLowerCase().startsWith(key.toLowerCase());
             })
             setDisplayUsers(filterd);
         } else {

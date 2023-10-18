@@ -176,10 +176,11 @@ export const adminLogoutAction = () => {
         })
     }
 }
-export const adminFetchUsers = () => {
+export const adminFetchUsers = (setDisplayUsers) => {
     return (dispatch) => {
         axios.get('/admin/users/all', { withCredentials: true }).then((result) => {
-        dispatch({
+            setDisplayUsers(result.data?.data?.users)
+            dispatch({
                 type:'get_users',
                 payload: {users : result.data?.data?.users}
             })
@@ -213,11 +214,11 @@ export const adminCreateAction = ({image, name, email, password},setForm, setIma
     }
 }
 
-export const userDeleteAction = (id, setOpen) => {
+export const userDeleteAction = (id, setOpen, setDisplayUsers) => {
     return (dispatch) => {
         axios.delete(`/admin/users/delete/${id}`, { withCredentials: true }).then((result) => {
             setOpen(false);
-            dispatch(adminFetchUsers());
+            dispatch(adminFetchUsers(setDisplayUsers));
         }).catch((err) => {
             toast.error("Something went wrong!");
         })

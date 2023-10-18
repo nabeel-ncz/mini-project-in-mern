@@ -64,9 +64,10 @@ function App() {
           (<>
             <Route path='/' element={<Home />} />
             <Route path='/edit' element={<EditUser />} />
-            <Route path='*' element={admin.isAuthenticated &&
+            <Route path='*' element={admin.isAuthenticated ?
               <Navigate to={`${location.pathname.split('/').at(1) === "admin" ?
-                "/admin" : "/"}`} replace />} />
+                "/admin" : "/"}`} replace /> : <Navigate to={`${location.pathname.split('/').at(1) === "admin" ?
+                "/admin/auth" : "/"}`} replace />} />
           </>) :
           (<>
             <Route path='/register' element={<Register />} />

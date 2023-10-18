@@ -11,7 +11,7 @@ const registerUser = async (req, res) => {
     try {
         const hash = await bcrypt.hash(password, 10);
         const data = await userCollection.create({
-            name,
+            name,e
             email,
             password: hash,
             profile: filename,
